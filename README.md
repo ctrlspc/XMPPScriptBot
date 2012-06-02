@@ -20,7 +20,8 @@ However if you want to try it out:
 6. python ScriptedConversationBot -s script.txt (the script file doesn't need to exist yet, but it will complain if you dont specify the arg (next on my todo list to implement the script parsing)
 7. sit back and watch the chat unfold in your chatroom window.
 
-Development TODO's
+Development TODO's:
+
 1. Implement the script parser
 2. Abstract the dependency on SleekXMPP (so that you can use whatever xmpp library you like)
 3. Proper Sphinx docs
