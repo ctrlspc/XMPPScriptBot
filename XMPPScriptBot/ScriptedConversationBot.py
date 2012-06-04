@@ -4,72 +4,8 @@ import sys
 import logging
 from optparse import OptionParser
 from threading import Timer
-import sleekxmpp
+from Bot import SleekXMPPBot
 import yaml
-
-
-
-class ScriptedGroupConversationBot(sleekxmpp.ClientXMPP):
-
-    """
-        A SleekXMPP bot that knows how to signin to the server, and join a predefined room.
-        Can then be used be a controller object to send messages.
-        Optionally you can supply a message_handler funtion which will be called everytime the bot
-        detects that a message has been received in the room. 
-    """
-
-    def __init__(self, jid, password, room, nick,message_handler=None):
-        """
-        
-        Arguments:
-            jid -- the username for the jabber service eg bot1@localhost
-            password -- the password to authenticate the jid
-            room -- the room to join upon succesfull authorization
-            nick -- the nickname to use on entering the room
-            message_handler -- an optional message handler, the bot will forward any messages received to this function
-            otherwise it can just be used to send messages.
-        
-        """
-        
-        sleekxmpp.ClientXMPP.__init__(self, jid, password, sasl_mech='PLAIN')#there is a bug 
-        self.in_room = False
-        self.room = room
-        self.nick = nick
-
-        #once we have been auth/authd then we can join the room
-        self.add_event_handler("session_start", self.start)
-
-        if message_handler is not None:
-            #pass any messages received in the room off to the message handler
-            self.add_event_handler("groupchat_message", message_handler)
-            self.add_event_handler("message", message_handler)
-    
-        self.register_plugin('xep_0030') # Service Discovery
-        self.register_plugin('xep_0045') # Multi-User Chat
-        self.register_plugin('xep_0199') # XMPP Ping
-    
-        # Connect to the XMPP server and start processing XMPP stanzas.
-        if self.connect():
-            self.process(block=False)
-
-    def start(self, event):
-        """
-        Process the session_start event.
-
-        Autjorization has been handled, so join the room
-
-        Arguments:
-            event -- An empty dictionary. The session_start
-                     event does not provide any additional
-                     data.
-        """
-        self.get_roster()
-        self.send_presence()
-        self.plugin['xep_0045'].joinMUC(self.room,
-                                        self.nick,
-                                        wait=True)
-        self.in_room = True # so that the contoller can know that you are in the room.
-
 
 class Script:
     
@@ -100,19 +36,20 @@ class Script:
         
         self.actorBots = {}
         
-    def handle_message(self,msg):
-        print 'got message'
-        
+    
     def __actor_joins(self, actor):
         
         actor_config = self.actors[actor]
-        self.actorBots[actor] = ScriptedGroupConversationBot(actor_config['jid'], 
-                                                           actor_config['pass'], 
-                                                           'hgg@conference.localhost', 
-                                                           actor_config['nick'])
+        
+        bot = SleekXMPPBot()
+        bot.auth_auth(actor_config['jid'], 
+                      actor_config['pass'], 
+                      lambda :bot.join_muc('hgg@conference.localhost', actor_config['nick']))
+        
+        self.actorBots[actor] = bot
     
     def __actor_leaves(self, actor):
-        self.actorBots[actor].disconnect()
+        self.actorBots[actor].signout()
         
     def start_conversation(self):
         
@@ -130,8 +67,9 @@ class Script:
         elif script_line['type'] == 'SPEAK':
             
             actor = self.actorBots[script_line['actor']]
-            actor.send_message(mto='hgg@conference.localhost',mbody=script_line['line'],mtype='groupchat',mfrom='bot1@localhost')
-        
+            actor.send_message(message=script_line['line'],
+                                to='hgg@conference.localhost', 
+                                is_group_message=True)
         if len(self.script) > 0:
             
             if script_line['delay'] > 0:

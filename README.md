@@ -22,6 +22,6 @@ However if you want to try it out:
 
 Development TODO's:
 
-1. Implement the script parser
-2. Abstract the dependency on SleekXMPP (so that you can use whatever xmpp library you like)
+1. Implement the script parser - DONE
+2. Abstract the dependency on SleekXMPP (so that you can use whatever xmpp library you like, and for easier unittests)
 3. Proper Sphinx docs
