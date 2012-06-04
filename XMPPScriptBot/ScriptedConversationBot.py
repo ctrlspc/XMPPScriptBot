@@ -5,13 +5,9 @@ import logging
 from optparse import OptionParser
 from threading import Timer
 import sleekxmpp
+import yaml
 
 
-if sys.version_info < (3, 0):
-    reload(sys)
-    sys.setdefaultencoding('utf8')
-else:
-    raw_input = input
 
 class ScriptedGroupConversationBot(sleekxmpp.ClientXMPP):
 
@@ -75,38 +71,21 @@ class ScriptedGroupConversationBot(sleekxmpp.ClientXMPP):
         self.in_room = True # so that the contoller can know that you are in the room.
 
 
-class Script():
+class Script:
     
-    def __init__(self):
-        self.actors = {'S':{'nick':'Slartibartfast', 'jid':'bot1@localhost', 'pass':'password'},
-                       'AD':{'nick':'Arthur Dent', 'jid':'bot2@localhost', 'pass':'password'},
-                       'BP':{'nick':'Bowl of Petunias', 'jid':'bot3@localhost', 'pass':'password'}}
+    def __init__(self, **kwargs):
         
-        self.script = [
-                           {'type':'JOIN', 'actor':'S', 'delay':2},
-                           {'type':'JOIN', 'actor':'AD', 'delay':2},
-                           
-                           {'type':'SPEAK','actor':'S', 'line':"You must come with me." , 'delay':3},
-                           {'type':'SPEAK','actor':'AD', 'line':"Who are you?" , 'delay':3},
-                           {'type':'SPEAK','actor':'S', 'line':"What? No. My name's not important. You must come with me, or you'll be late." , 'delay':3},
-                           {'type':'SPEAK','actor':'AD', 'line':"Late for what?" , 'delay':3},
-                           {'type':'SPEAK','actor':'S', 'line':"Well, um, what's your name Earthman?" , 'delay':3},
-                           {'type':'SPEAK','actor':'AD', 'line':"Dent. Arthur Dent." , 'delay':3},
-                           {'type':'SPEAK','actor':'S', 'line':"Well, late as in *the late* Dentarthurdent. It's a sort of threat. You see?" , 'delay':3},
-                           {'type':'SPEAK','actor':'AD', 'line':"No. " , 'delay':3},
-                           {'type':'SPEAK','actor':'S', 'line':"Your friends are safe, you can trust me." , 'delay':3},
-                           {'type':'SPEAK','actor':'AD', 'line':"Trust a man who won't even tell me his name? " , 'delay':3},
-                           {'type':'SPEAK','actor':'S', 'line':"Well, um, my name is, um, it's" , 'delay':3},
-                           {'type':'SPEAK','actor':'S', 'line':"Slartibartfast. " , 'delay':3},
-                           {'type':'SPEAK','actor':'AD', 'line':"What?" , 'delay':3},
-                           {'type':'SPEAK','actor':'S', 'line':"I *said* it wasn't important." , 'delay':3},
-                           {'type':'JOIN', 'actor':'BP', 'delay':5},
-                           {'type':'SPEAK','actor':'BP', 'line':"Oh no! Not again! (SMASH)" , 'delay':1},
-                           {'type':'LEAVE', 'actor':'BP', 'delay':5},
-                           {'type':'LEAVE', 'actor':'S', 'delay':0},
-                           {'type':'LEAVE', 'actor':'AD', 'delay':0},
-                           
-                       ]
+        if('file' in kwargs):
+            with open(kwargs.get('file'), 'r') as script_file:
+                script_dict = yaml.load(script_file)
+                
+            self.actors = script_dict['actors']
+            self.script = script_dict['script']
+        elif 'actors' in kwargs and 'script' in kwargs:
+            self.actors = kwargs.get('actors')
+            self.script = kwargs.get('script')
+        else:
+            raise AttributeError('You must specify either a yaml formatted config file, or the actors and script attributes.')   
         
         self.actorBots = {}
         
@@ -153,39 +132,7 @@ class Script():
     
     
 
-def _parse_script(script):
-    """
-    Parses the supplied script file. This is an INI style text file and should look something like this:
-    [actors]
-    S:Slartibartfast:bot1@localhost:secret_password
-    AD:Arthur Dent:bot2@localhost:secret_password
-    
-    [script]
-    S: You must come with me. :3
-    AD: Who are you? :3
-    S: What? No. My name's not important. You must come with me, or you'll be late. :3
-    AD: Late for what? :3
-    S: Well, um, what's your name Earthman? :3
-    AD: Dent. Arthur Dent. :3
-    S: Well, late as in *the late* Dentarthurdent. It's a sort of threat. You see? :3
-    AD: No. :3
-    S: Your friends are safe, you can trust me. :3
-    AD: Trust a man who won't even tell me his name? :3
-    S: Well, um, my name is, um, it's :3
-    S: Slartibartfast. :3
-    AD: What? :3
-    S: I *said* it wasn't important. :3
-    
-    """
-    
-    return Script()
-    
 
-
-
-def message_handler(msg):
-    
-    pass
 
 if __name__ == '__main__':
     # Setup the command line arguments.
@@ -218,7 +165,7 @@ if __name__ == '__main__':
         parser.print_help()
         exit(-1)
 
-    script = _parse_script(opts.script_src)    
+    script = Script(file=opts.script_src)  
     script.start_conversation()
     
 
