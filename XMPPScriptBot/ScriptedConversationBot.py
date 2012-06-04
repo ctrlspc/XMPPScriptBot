@@ -76,11 +76,22 @@ class Script:
     def __init__(self, **kwargs):
         
         if('file' in kwargs):
-            with open(kwargs.get('file'), 'r') as script_file:
-                script_dict = yaml.load(script_file)
-                
-            self.actors = script_dict['actors']
-            self.script = script_dict['script']
+            
+            try:
+                with open(kwargs.get('file'), 'r') as script_file:
+                    script_dict = yaml.load(script_file)
+                    
+                self.actors = script_dict['actors']
+                self.script = script_dict['script']
+            except IOError:
+                logging.error('The script file could not be found')
+                exit(-1)
+            except yaml.parser.ParserError:
+                logging.error('The script was not properly formed (make sure you use 4 spaces and not a tab)')
+                exit(-1)
+            except KeyError:
+                logging.error('The script was not properly formed, you are missing one of the actors or script nodes')
+                exit(-1)
         elif 'actors' in kwargs and 'script' in kwargs:
             self.actors = kwargs.get('actors')
             self.script = kwargs.get('script')
