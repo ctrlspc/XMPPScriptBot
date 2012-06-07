@@ -8,9 +8,14 @@ from Bot import SleekXMPPBot
 import yaml
 
 class Script:
+    '''
+        Where's my documentation?
+    '''
     
     def __init__(self, **kwargs):
-        
+        '''
+        Where's my documentation?
+        '''
         if('file' in kwargs):
             
             try:
@@ -52,7 +57,9 @@ class Script:
         self.actorBots[actor].signout()
         
     def start_conversation(self):
-        
+        '''
+        Where's my documentation?
+        '''
         self.__play_line()
         
     
