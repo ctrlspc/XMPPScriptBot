@@ -5,7 +5,10 @@ import sleekxmpp
 
 class BotBase():
     '''
-        Where's my documentation?
+        This is the Base class for the bots, it does not specify a default client class
+        so at a minimum a concrete subclass will need to specify a client class.
+        This lays out the interface for implementing classes, and provides some
+        basic asynchronous callback functionality
     '''
 
     def __init__(self, clientClass, plugins = ['xep_0030',# Service Discovery
