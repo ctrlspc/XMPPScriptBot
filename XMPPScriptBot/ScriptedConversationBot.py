@@ -1,9 +1,21 @@
+"""
+This is the ScriptedConversationBot module, and it contains the required classes to use the XMPP protocol to
+create scripted conversations using the XMPP protocol. This module doesn't know how to speak XMPP per-se it requires
+you to provide a XMPP CLient class, it defaults to using SleekXMPP if you do not specify your own class.
+
+
+"""
+
+
 from threading import Timer
 import yaml
 import sleekxmpp
 import logging
 
 class BotBase():
+    """
+        Document Me!!
+    """
 
     def __init__(self, clientClass, plugins = ['xep_0030',# Service Discovery
                                                'xep_0045',# Multi-User Chat
@@ -11,7 +23,20 @@ class BotBase():
                                                ]):
         
         
-                             
+        """Document Me
+
+        :param clientClass: The XMPP client class to be used
+        :type name: Class.
+        :param plugins: A list of plugins to be loaded (defaults to ['xep_0030',# Service Discovery
+                                               'xep_0045',# Multi-User Chat
+                                               'xep_0199',# XMPP Ping
+                                               ]):
+        :type state: list.
+    
+
+        
+        
+        """                    
                              
         self.clientClass = clientClass
         self.client = None
@@ -27,27 +52,125 @@ class BotBase():
         self.listeners[key] = callback
         
     def auth_auth(self, pid, password):
+        
+        """
+        
+            Document me!
+            
+            :param clientClass: The XMPP client class to be used
+            :type name: Class.
+            :param plugins: A list of plugins to be loaded (defaults to ['xep_0030',# Service Discovery
+                                                   'xep_0045',# Multi-User Chat
+                                                   'xep_0199',# XMPP Ping
+                                                   ]):
+            :type state: list.
+            :returns:  int -- the return code.
+            :raises: AttributeError, KeyError
+        """
         raise NotImplementedError
     
     def join_muc(self, room):
+        """
+        
+            Document me!
+            
+            :param clientClass: The XMPP client class to be used
+            :type name: Class.
+            :param plugins: A list of plugins to be loaded (defaults to ['xep_0030',# Service Discovery
+                                                   'xep_0045',# Multi-User Chat
+                                                   'xep_0199',# XMPP Ping
+                                                   ]):
+            :type state: list.
+            :returns:  int -- the return code.
+            :raises: AttributeError, KeyError
+        """
         raise NotImplementedError
     
     def send_message(self, message, to=None):
+        """
+        
+            Document me!
+            
+            :param clientClass: The XMPP client class to be used
+            :type name: Class.
+            :param plugins: A list of plugins to be loaded (defaults to ['xep_0030',# Service Discovery
+                                                   'xep_0045',# Multi-User Chat
+                                                   'xep_0199',# XMPP Ping
+                                                   ]):
+            :type state: list.
+            :returns:  int -- the return code.
+            :raises: AttributeError, KeyError
+        """
         raise NotImplementedError
     
     def signout(self):
+        """
+        
+            Document me!
+            
+            :param clientClass: The XMPP client class to be used
+            :type name: Class.
+            :param plugins: A list of plugins to be loaded (defaults to ['xep_0030',# Service Discovery
+                                                   'xep_0045',# Multi-User Chat
+                                                   'xep_0199',# XMPP Ping
+                                                   ]):
+            :type state: list.
+            :returns:  int -- the return code.
+            :raises: AttributeError, KeyError
+        """
         raise NotImplementedError
     
     def change_status(self, status):
+        """
+        
+            Document me!
+            
+            :param clientClass: The XMPP client class to be used
+            :type name: Class.
+            :param plugins: A list of plugins to be loaded (defaults to ['xep_0030',# Service Discovery
+                                                   'xep_0045',# Multi-User Chat
+                                                   'xep_0199',# XMPP Ping
+                                                   ]):
+            :type state: list.
+            :returns:  int -- the return code.
+            :raises: AttributeError, KeyError
+        """
         raise NotImplementedError
 
 class SleekXMPPBot(BotBase):
 
     def __init__(self, clientClass=sleekxmpp.ClientXMPP):
+        """
+        
+            Document me!
+            
+            :param clientClass: The XMPP client class to be used
+            :type name: Class.
+            :param plugins: A list of plugins to be loaded (defaults to ['xep_0030',# Service Discovery
+                                                   'xep_0045',# Multi-User Chat
+                                                   'xep_0199',# XMPP Ping
+                                                   ]):
+            :type state: list.
+            :returns:  int -- the return code.
+            :raises: AttributeError, KeyError
+        """
         BotBase.__init__(self, clientClass=sleekxmpp.ClientXMPP)
     
     def auth_auth(self, pid, password, listener):
+        """
         
+            Document me!
+            
+            :param clientClass: The XMPP client class to be used
+            :type name: Class.
+            :param plugins: A list of plugins to be loaded (defaults to ['xep_0030',# Service Discovery
+                                                   'xep_0045',# Multi-User Chat
+                                                   'xep_0199',# XMPP Ping
+                                                   ]):
+            :type state: list.
+            :returns:  int -- the return code.
+            :raises: AttributeError, KeyError
+        """
         self.client = self.clientClass(pid, password, sasl_mech='PLAIN')
         self._register_listener('auth_auth', listener)
         
@@ -71,6 +194,21 @@ class SleekXMPPBot(BotBase):
     
         
     def start(self, event):
+        
+        """
+        
+            Document me!
+            
+            :param clientClass: The XMPP client class to be used
+            :type name: Class.
+            :param plugins: A list of plugins to be loaded (defaults to ['xep_0030',# Service Discovery
+                                                   'xep_0045',# Multi-User Chat
+                                                   'xep_0199',# XMPP Ping
+                                                   ]):
+            :type state: list.
+            :returns:  int -- the return code.
+            :raises: AttributeError, KeyError
+        """
         self.connected = True 
         
         self._notify_listener('auth_auth')
@@ -79,7 +217,20 @@ class SleekXMPPBot(BotBase):
         self.client.send_presence()
         
     def join_muc(self, room, nick):
+        """
         
+            Document me!
+            
+            :param clientClass: The XMPP client class to be used
+            :type name: Class.
+            :param plugins: A list of plugins to be loaded (defaults to ['xep_0030',# Service Discovery
+                                                   'xep_0045',# Multi-User Chat
+                                                   'xep_0199',# XMPP Ping
+                                                   ]):
+            :type state: list.
+            :returns:  int -- the return code.
+            :raises: AttributeError, KeyError
+        """
         if not self.connected:
             raise RuntimeError('You need to be connected before you try to join a multi user chat session')
         
@@ -92,7 +243,20 @@ class SleekXMPPBot(BotBase):
         
     
     def send_message(self, message, to, is_group_message=False):
+        """
         
+            Document me!
+            
+            :param clientClass: The XMPP client class to be used
+            :type name: Class.
+            :param plugins: A list of plugins to be loaded (defaults to ['xep_0030',# Service Discovery
+                                                   'xep_0045',# Multi-User Chat
+                                                   'xep_0199',# XMPP Ping
+                                                   ]):
+            :type state: list.
+            :returns:  int -- the return code.
+            :raises: AttributeError, KeyError
+        """
         if not self.connected:
             raise RuntimeError('You need to be connected before you attempt to send a message')
         
@@ -105,9 +269,37 @@ class SleekXMPPBot(BotBase):
         
     
     def signout(self):
+        """
+        
+            Document me!
+            
+            :param clientClass: The XMPP client class to be used
+            :type name: Class.
+            :param plugins: A list of plugins to be loaded (defaults to ['xep_0030',# Service Discovery
+                                                   'xep_0045',# Multi-User Chat
+                                                   'xep_0199',# XMPP Ping
+                                                   ]):
+            :type state: list.
+            :returns:  int -- the return code.
+            :raises: AttributeError, KeyError
+        """
         self.client.disconnect()
     
     def change_presence(self, status):
+        """
+        
+            Document me!
+            
+            :param clientClass: The XMPP client class to be used
+            :type name: Class.
+            :param plugins: A list of plugins to be loaded (defaults to ['xep_0030',# Service Discovery
+                                                   'xep_0045',# Multi-User Chat
+                                                   'xep_0199',# XMPP Ping
+                                                   ]):
+            :type state: list.
+            :returns:  int -- the return code.
+            :raises: AttributeError, KeyError
+        """
         if not self.connected:
             raise RuntimeError('You need to be connected before you attempt to change your presence')
         
@@ -122,9 +314,20 @@ class Script:
     '''
     
     def __init__(self, **kwargs):
-        '''
-        Where's my documentation?
-        '''
+        """
+        
+            Document me!
+            
+            :param clientClass: The XMPP client class to be used
+            :type name: Class.
+            :param plugins: A list of plugins to be loaded (defaults to ['xep_0030',# Service Discovery
+                                                   'xep_0045',# Multi-User Chat
+                                                   'xep_0199',# XMPP Ping
+                                                   ]):
+            :type state: list.
+            :returns:  int -- the return code.
+            :raises: AttributeError, KeyError
+        """
         if('file' in kwargs):
             
             try:
@@ -166,9 +369,20 @@ class Script:
         self.actorBots[actor].signout()
         
     def start_conversation(self):
-        '''
-        Where's my documentation?
-        '''
+        """
+        
+            Document me!
+            
+            :param clientClass: The XMPP client class to be used
+            :type name: Class.
+            :param plugins: A list of plugins to be loaded (defaults to ['xep_0030',# Service Discovery
+                                                   'xep_0045',# Multi-User Chat
+                                                   'xep_0199',# XMPP Ping
+                                                   ]):
+            :type state: list.
+            :returns:  int -- the return code.
+            :raises: AttributeError, KeyError
+        """
         self.__play_line()
         
     
