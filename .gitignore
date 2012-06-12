@@ -29,3 +29,5 @@ pip-log.txt
 #aptana
 .project
 .pydevproject
+
+.settings/org.eclipse.core.resources.prefs
