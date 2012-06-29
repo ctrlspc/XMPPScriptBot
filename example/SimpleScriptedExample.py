@@ -17,11 +17,61 @@
 
 """
 
-import sys
+import csv
 import logging
 from optparse import OptionParser
 from XMPPScriptBot.ScriptedConversationBot import Script
+from datetime import datetime
 
+start = None
+dataLog = []
+
+def parseFromField(field):
+    if field:
+        
+        fieldComponents = field.__str__().split('/')
+        
+        if len(fieldComponents) == 2:
+            if fieldComponents[1] == 'admin':
+                return (1, fieldComponents[1])
+            else:
+                return (0, fieldComponents[1])
+        
+    return (-1, 'system')
+
+def parseMessageField(field):
+    
+    if field == 'Be Nice to one antother!!':
+        return 1
+    elif field == 'This a warning, please stop any abusive behavior or the chat will be terminated':
+        return 2
+    elif field == 'This chat session will now be terminated':
+        return 3
+    else:
+        return -1
+    return 0
+
+def monitorCallbackFuntion(msg):
+    
+    actor_type, actor = parseFromField(msg['from'])
+    dataLog.append({'timestamp':(datetime.now() - start).total_seconds() *1000,
+                    'actor':actor,
+                    'message':msg['body'],
+                    'actor_type':actor_type,
+                    'message_type':parseMessageField(msg['body']),
+                    })
+    
+    
+def playFinishedCallback():
+    #print out the dataLog to csv file
+    
+    with open('data.csv', 'wb') as f:
+        keys = ['timestamp','actor','message','actor_type','message_type']
+        dictWriter = csv.DictWriter(f,keys)
+        dictWriter.writer.writerow(keys)
+        dictWriter.writerows(dataLog)
+    print 'done'
+    
 if __name__ == '__main__':
     # Setup the command line arguments.
     parser = OptionParser()
@@ -44,7 +94,12 @@ if __name__ == '__main__':
                         format='%(levelname)-8s %(message)s')
 
 
-    script = Script(file='hgg.yaml')  
+    script = Script(file='hgg.yaml', 
+                    monitorCallback=monitorCallbackFuntion, 
+                    playFinishedCallback=playFinishedCallback)  
+    
+    
+    start = datetime.now()
     script.start_conversation()
     
 
