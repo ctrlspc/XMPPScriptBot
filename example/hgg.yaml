@@ -3,6 +3,7 @@ actors:
     jid: bot2@localhost
     nick: Arthur Dent
     pass: password
+    Monitor: True
   BP:
     jid: bot3@localhost
     nick: Bowl of Petunias
