@@ -20,7 +20,7 @@ class BotBase():
     def __init__(self, clientClass, plugins = ['xep_0030',# Service Discovery
                                                'xep_0045',# Multi-User Chat
                                                'xep_0199',# XMPP Ping
-                                               ], messageReceivedHandler=None):
+                                               ]):
         
         
         """Document Me
@@ -43,7 +43,6 @@ class BotBase():
         self.plugins = plugins
         self.listeners = {}
         self.connected = False
-        self.messageReceivedHandler = messageReceivedHandler
     
     def _notify_listener(self, key):
         listener = self.listeners.get(key,None)
@@ -140,7 +139,7 @@ class BotBase():
 
 class SleekXMPPBot(BotBase):
 
-    def __init__(self, clientClass=sleekxmpp.ClientXMPP, messageReceivedHandler=None):
+    def __init__(self, clientClass=sleekxmpp.ClientXMPP):
         """
         
             Document me!
@@ -155,7 +154,7 @@ class SleekXMPPBot(BotBase):
             :returns:  int -- the return code.
             :raises: AttributeError, KeyError
         """
-        BotBase.__init__(self, clientClass=sleekxmpp.ClientXMPP,messageReceivedHandler=messageReceivedHandler)
+        BotBase.__init__(self, clientClass=sleekxmpp.ClientXMPP)
     
     def auth_auth(self, pid, password, listener):
         """
@@ -188,8 +187,7 @@ class SleekXMPPBot(BotBase):
             self.client.process(block=False)
 
     def __groupchat_handler(self,msg):
-        if self.messageReceivedHandler:
-            self.messageReceivedHandler(msg)
+        pass
     
     def __message_handler(self,msg):
         pass
@@ -355,38 +353,21 @@ class Script:
         
         self.actorBots = {}
         
-       
-        self.monitorCallback = kwargs.get('monitorCallback', None)
-        self.playFinishedCallback = kwargs.get('playFinishedCallback', None)
-        self.running=False
+    
     def __actor_joins(self, actor):
         
-        if self.running:
-            actor_config = self.actors[actor]
-            callback = None
-            
-            if actor_config.get('monitor', None):
-                callback = self.monitorCallback
-                
-            bot = SleekXMPPBot(messageReceivedHandler=callback)
-            bot.auth_auth(actor_config['jid'], 
-                          actor_config['pass'], 
-                          lambda :bot.join_muc('hgg@conference.localhost', actor_config['nick']))
-            
-            self.actorBots[actor] = bot
+        actor_config = self.actors[actor]
+        
+        bot = SleekXMPPBot()
+        bot.auth_auth(actor_config['jid'], 
+                      actor_config['pass'], 
+                      lambda :bot.join_muc('hgg@conference.localhost', actor_config['nick']))
+        
+        self.actorBots[actor] = bot
     
     def __actor_leaves(self, actor):
         self.actorBots[actor].signout()
-    
-    def abort(self):
-        self.running = False
         
-        for actor in self.actorBots:
-            self.__actor_leaves(actor)
-            
-        self.playFinishedCallback()
-        
-          
     def start_conversation(self):
         """
         
@@ -402,35 +383,30 @@ class Script:
             :returns:  int -- the return code.
             :raises: AttributeError, KeyError
         """
-        self.running = True
         self.__play_line()
         
     
     
     def __play_line(self):
         
-        if self.running:
-            script_line = self.script.pop(0)
-            if script_line['type'] == 'JOIN':
-                self.__actor_joins(script_line['actor'])
-            elif script_line['type'] == 'LEAVE':
-                self.__actor_leaves(script_line['actor'])
-            elif script_line['type'] == 'SPEAK':
-                
-                actor = self.actorBots[script_line['actor']]
-                actor.send_message(message=script_line['line'],
-                                    to='hgg@conference.localhost', 
-                                    is_group_message=True)
-            if len(self.script) > 0:
-                
-                if script_line['delay'] > 0:
-                    t = Timer(script_line['delay'], self.__play_line)
-                    t.start()
-                else:
-                    self.__play_line()
+        script_line = self.script.pop(0)
+        if script_line['type'] == 'JOIN':
+            self.__actor_joins(script_line['actor'])
+        elif script_line['type'] == 'LEAVE':
+            self.__actor_leaves(script_line['actor'])
+        elif script_line['type'] == 'SPEAK':
+            
+            actor = self.actorBots[script_line['actor']]
+            actor.send_message(message=script_line['line'],
+                                to='hgg@conference.localhost', 
+                                is_group_message=True)
+        if len(self.script) > 0:
+            
+            if script_line['delay'] > 0:
+                t = Timer(script_line['delay'], self.__play_line)
+                t.start()
             else:
-                if self.playFinishedCallback:
-                    self.playFinishedCallback()
+                self.__play_line()
     
     
     
