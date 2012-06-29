@@ -304,7 +304,18 @@ class SleekXMPPBot(BotBase):
             raise RuntimeError('You need to be connected before you attempt to change your presence')
         
         
-        self.client.send_presence()
+        if status:
+            msg = self.client.make_message(mto='hgg@conference.localhost')
+            msg['from']='bot1@localhost'
+            msg['type']='groupchat'
+            msg['chat_state'] = 'composing'
+            msg.send()
+        else:
+            msg=sleekxmpp.Message()
+            msg['from']='bot1@localhost'
+            msg['chat_state'] = 'active'
+            msg.send(True)
+
 
 
 
